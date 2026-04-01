@@ -19,6 +19,7 @@ export default function Form() {
     const centerX = (docWidth, elementWidth) => (docWidth - elementWidth) / 2;
 
     const [showForm, setShowForm] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     // Declarando uma nova variavel dados com state e atribuir o objecto
     const [data, setData] = useState({
@@ -42,33 +43,34 @@ export default function Form() {
         // Bloquear o carregamento da pagina
         e.preventDefault();
 
-        if (!data.nome || !data.area || !data.instituition || !data.country || !data.phone1 || !data.email || !data.tema || !data.resumo ) {
-            alert("Por favor, preencha todos os campos corretamente.");
+        if (!data.nome || !data.area || !data.instituition || !data.country || !data.phone1 || !data.email) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
         }
 
+        setLoading(true);
+
         const TemplateParams = {
-            from_name: data.nome,
-            formatio_area: data.area,
-            instituition_represent: data.instituition,
-            your_country: data.country,
-            your_phone1: data.phone1,
-            your_phone2: data.phone2,
+            nome: data.nome,
+            area: data.area,
+            instituition: data.instituition,
+            country: data.country,
+            phone1: data.phone1,
+            phone2: data.phone2,
             email: data.email,
             tema: data.tema,
             resumo: data.resumo,
             //file_doc: data.file
         };
 
-        emailjs.send("service_j9mor3t", "template_tv15f95", TemplateParams, "VUpV8h73I5hAtJioZ")
+        emailjs.send("service_jz1enkk", "template_02h6tiz", TemplateParams, "Oz2cgdKAxeoWPNrOw")
         //emailjs.send("service_k8rse5k", "template_acvlmdn", TemplateParams, "ElH6MxKBSzSx-5ZoY")
             .then((response) => {
-                alert("Inscrição enviado com sucesso. Confirme o downloand da sua ficha", response.status, response.text);
-                // Funcao para gerar pdf
-                if (!data.nome || !data.area || !data.instituition || !data.country || !data.phone1 || !data.email || !data.resumo) {
-                    alert("Por favor, preencha todos os campos corretamente.");
-                } else {
-                    // Criar um novo objeto jsPDF
-                    const doc = new jsPDF();
+                setLoading(false);
+                alert("Inscrição efetuada com sucesso. Confirme o download da sua ficha.");
+                
+                // Criar um novo objeto jsPDF
+                const doc = new jsPDF();
 
                     // Barra Azul
                     const BarradWidth = 500;
@@ -138,7 +140,7 @@ export default function Form() {
 
                     // Salvar o arquivo PDF
                     doc.save(`Ficha_de_Inscricao__${data.nome}.pdf`);
-                };
+                
                 setData({
                     nome: '',
                     area: '',
@@ -149,34 +151,35 @@ export default function Form() {
                     email: '',
                     tema: '',
                     resumo: '',
-                    file: ''
                 });
 
+                setShowForm(false);
+
             }, (err) => {
-                console.log("Erro: ", err);
+                setLoading(false);
+                console.log("Erro do EmailJS: ", err);
+                const errorMessage = err?.text || err?.message || JSON.stringify(err);
+                alert(`Ocorreu um erro ao enviar (EmailJS). Detalhes: ${errorMessage}. Por favor, verifique se a sua cota do EmailJS não esgotou.`);
             });
     };
-    const WordDoc = () => {
-        const emailRecipient = 'semana.dalp@med.gov.ao'; // Email do destinatário
-        const emailSender = data.email; // Email do emissor
-        const subject = 'Nome completo (o mesmo utilizado na ficha):'; // Assunto do e-mail (opcional)
-        const body = 'Endereço de correio electrónico (o mesmo utilizado na ficha):      \n\n\nInsira o arquivo Word do Resumo'; // Corpo do e-mail (opcional)
+    const WordDoc = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const emailRecipient = 'cniilp.geral@gmail.com'; // Email do destinatário - semana.dalp@med.gov.ao
+        const emailSender = data.email || ''; // Email do emissor
+        const subject = 'Nome completo (o mesmo utilizado na ficha): ' + (data.nome || ''); // Assunto do e-mail
+        const body = 'Endereço de correio electrónico (o mesmo utilizado na ficha): ' + (data.email || '') + '\n\n\nInsira o arquivo Word do Resumo'; // Corpo do e-mail
     
-       // window.location.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailRecipient}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}&bcc=${emailSender}`;
         window.open(
             `https://mail.google.com/mail/?view=cm&fs=1&to=${emailRecipient}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}&bcc=${emailSender}`
         );
-
-        setShowForm(true);
     };
 
     const Zoom = (e) => {
-        const link_acss = '33GyORtLPQslqbDGFt446r8FGOJ0g9.1'; 
+        if (e && e.preventDefault) e.preventDefault();
+        const link_acss = 'ki9vHb9DA8HVJ3oxj7RTjW7Cv3eeH4uhSVNB7CT773w'; 
         window.open(
-            `https://us06web.zoom.us/j/81294850770?pwd=${link_acss}`
+            `https://us06web.zoom.us/meetings/87311653546/invitations?signature=${link_acss}`
         );
-
-        setShowForm(true);
     };
 
     return (
@@ -186,8 +189,8 @@ export default function Form() {
                 <div className="container form__section-container">
                     <div className="logoSemanalp"><img src={logoSemanalp} width="250" id="semana_lingua" /></div>
                     <h1 id="Tema">Semana da Língua Portuguesa</h1>
-                    <h1 id="Tema1">“Língua Portuguesa: Um Oceano de Culturas, um Mundo de Possibilidades.”</h1>
-                    <h1 id="Tema3">De 5 a 10 de Maio de 2025 - 6.ª edição</h1>
+                    <h1 id="Tema1">“Lema: Língua Portuguesa: uma Ponte que une Quadrantes.”</h1>
+                    <h1 id="Tema3">De 5 a 9 de Maio de 2026 - 7.ª edição</h1>
                     <h1 id="Tema6">Inscrições até ao dia 30 de Abril</h1>
                     <h1 id="Tema5">Formulário de Inscrição</h1>
 
@@ -196,7 +199,7 @@ export default function Form() {
                     <form action="" method="" onSubmit={enviarDados}>
 
                         {/* Criar o campo, quando o usuario digitar valor no campo, chamar com onChange a funcao valorInput*/}
-                        <input type="text" name="nome" placeholder="Nome completo" onChange={valorInput} value={data.name} required />
+                        <input type="text" name="nome" placeholder="Nome completo" onChange={valorInput} value={data.nome} required />
 
                         {/* Criar o campo, quando o usuario digitar valor no campo, chamar com onChange a funcao valorInput*/}
                         <input type="text" name="area" placeholder="Área de formação" onChange={valorInput} value={data.area} required />
@@ -221,22 +224,32 @@ export default function Form() {
 
                         {/* Criar o campo, quando o usuario digitar valor no campo, chamar com onChange a funcao valorInput*/}
                         {/* Deixar o textarea com valor de caracteres em infinito*/}
-                        <textarea name="resumo" id="Tema4" cols="30" rows="10" placeholder="Resumo" onChange={valorInput} value={data.resumo} maxLength={990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000} required></textarea>
+                        <textarea name="resumo" id="Tema4" cols="30" rows="10" placeholder="Resumo" onChange={valorInput} value={data.resumo}  required></textarea>
                         <div className='btns-container'>
-                            <input type="submit" name="Increver" value="Inscrever-se" className="btn" />
+                            <input type="submit" name="Increver" value={loading ? "Enviando..." : "Inscrever-se"} className="btn" disabled={loading} style={loading ? {opacity: 0.7, cursor: 'not-allowed'} : {}} />
                             {/* <input type="submit" value="Participar via Zoom" className='btn' onclick="window.location.href='https://us06web.zoom.us/j/81294850770?pwd=33GyORtLPQslqbDGFt446r8FGOJ0g9.1';"/> */}
-                            <label htmlFor="" onClick={Zoom} >Click para participar -- <a onClick={Zoom} > Participar</a></label>
+                            <label htmlFor="">Click para participar -- <button onClick={Zoom} style={{background: 'none', border: 'none', color: '#1B75BC', cursor: 'pointer', textDecoration: 'underline'}}>Participar</button></label>
                         </div>
                     </form>
-                    <label htmlFor="" onClick={WordDoc} >Por favor envie o seu resumo no formato Word.doc -- <a onClick={WordDoc} > Enviar Resumo</a></label>
+                    {/* <label htmlFor="">Por favor envie o seu resumo no formato Word.doc -- <button onClick={WordDoc} style={{background: 'none', border: 'none', color: '#1B75BC', cursor: 'pointer', textDecoration: 'underline'}}>Enviar Resumo</button></label>*/}
                     {/* <EmailButton />*/}
                     <img src={footerimg} width="780" id="_footer" />
                 </div>
             </section>) : (
-                <button onClick={WordDoc}>
-                  Enviar E-mail
-                </button>
+                <div style={{ textAlign: 'center', padding: '50px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <h2 style={{ color: '#1b75bc', marginBottom: '15px' }}>Inscrição efectuada com sucesso!</h2>
+                    <p style={{ fontSize: '1.2rem', marginBottom: '25px', color: '#333' }}>O seu PDF foi gerado. Caso tenha uma comunicação, envie-nos o seu resumo em anexo no formato Word.</p>
+                    <button onClick={WordDoc} className="btn" style={{ marginBottom: '15px' }}>
+                      Enviar Resumo por E-mail
+                    </button>
+                    <button onClick={() => {
+                        setShowForm(true);
+                    }} className="btn" style={{ background: '#555' }}>
+                      Nova Inscrição
+                    </button>
+                </div>
               )}
         </div>
     );
 }
+
